@@ -1,23 +1,18 @@
-from src.DMARTProject.loggers.logger import logger  
+from src.DMARTProject.components.data_ingestion_pipeline import DataIngestionPipeline
+from src.DMARTProject.loggers.logger import logger
 from src.exception import CustomException
-from src.DMARTProject.components.data_ingestion import DataIngestionPipeline
-from src.DMARTProject.__init__ import load_dotenv
-from src.DMARTProject.components.data_ingestion import DataIngestion
+import sys
 
-import sys  
 
 if __name__ == "__main__":
-    logger.info("DMART Project started successfully.")
     try:
-        logger.info("Starting DMART Project application.")
-        data_ingestion_pipeline = DataIngestionPipeline()
-        data_ingestion_pipeline.initiate_data_ingestion()
-        logger.info("DMART Project application finished successfully.")
+        logger.info("DMART application started")
 
-    # Application logic goes here
+        pipeline = DataIngestionPipeline()
+        pipeline.initiate_data_ingestion()
+
+        logger.info("DMART application finished successfully")
+
     except Exception as e:
-        logger.error("An error occurred in DMART Project application.")
+        logger.exception("Application failed")
         raise CustomException(e, sys)
-
-
-

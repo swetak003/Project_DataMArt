@@ -1,52 +1,50 @@
 import os
 import sys
-from src.DMARTProject.loggers.logger import logger
-from src.exception import CustomException   
-from src.DMARTProject.utils.common import create_directories
-from src.DMARTProject.__init__ import DataIngestion
 import pandas as pd
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
+
+from src.DMARTProject.loggers.logger import logger
+from src.exception import CustomException
+
+load_dotenv()
 
 
-from dataclasses import dataclass
-
-
-@dataclass
-class DataIngestionConfig:
-    raw_data_path: str=os.path.join("artifacts","raw_data.csv")
-    train_data_path: str=os.path.join("artifacts","train_data.csv")
-    test_data_path: str=os.path.join("artifacts","test_data.csv")
-    test_size: float=0.2
-    random_state: int=42
-class DataIngestionPipeline:
+class DataIngestion:
     def __init__(self):
-        self.data_ingestion_config=DataIngestionConfig()
-
-      
-
-    def initiate_data_ingestion(self):
-        logger.info("Data Ingestion started")
         try:
-            data_ingestion=DataIngestion()
-            raw_data_df=data_ingestion.load_data()
-            ##reading data from source
-            logger.info("Reading from mssql database completed successfully")
+            self.db_server = os.getenv("DB_SERVER")
+            self.db_database = os.getenv("DB_DATABASE")
+            self.db_driver = os.getenv("DB_DRIVER")
+            self.table_name = os.getenv("TABLE_NAME")
 
-            create_directories(os.path.dirname(self.data_ingestion_config.raw_data_path))
+            if not all([self.db_server, self.db_database, self.db_driver, self.table_name]):
+                raise ValueError(
+                    "Missing DB environment variables. "
+                    "Check DB_SERVER, DB_DATABASE, DB_DRIVER, TABLE_NAME in .env"
+                )
 
-            raw_data_df.to_csv(self.data_ingestion_config.raw_data_path,index=False)
-            logger.info(f"Raw data saved at {self.data_ingestion_config.raw_data_path}")
-
-            train_df,test_df=data_ingestion.split_data_as_train_test(raw_data_df,
-                                                                      test_size=self.data_ingestion_config.test_size,
-                                                                      random_state=self.data_ingestion_config.random_state)
-            train_df.to_csv(self.data_ingestion_config.train_data_path,index=False)
-            test_df.to_csv(self.data_ingestion_config.test_data_path,index=False)
-            logger.info("Data ingestion completed successfully")
-
-            return (
-                self.data_ingestion_config.train_data_path,
-                self.data_ingestion_config.test_data_path
+            self.database_url = (
+                f"mssql+pyodbc://@{self.db_server}/{self.db_database}"
+                f"?driver={self.db_driver.replace(' ', '+')}"
+                f"&trusted_connection=yes"
             )
+
+            logger.info("Database connection initialized")
+
         except Exception as e:
-            logger.error("Error occurred during data ingestion")
-            raise CustomException(e,sys)
+            logger.exception("Error initializing DataIngestion")
+            raise CustomException(e, sys)
+
+    def load_data(self) -> pd.DataFrame:
+        try:
+            engine = create_engine(self.database_url)
+            query = f"SELECT * FROM {self.table_name}"
+            df = pd.read_sql(query, engine)
+
+            logger.info("Data loaded successfully from MSSQL")
+            return df
+
+        except Exception as e:
+            logger.exception("Error loading data from MSSQL")
+            raise CustomException(e, sys)

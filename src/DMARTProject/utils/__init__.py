@@ -1,14 +1,13 @@
 import os
 import sys
-from src.DMARTProject.loggers import logger
-from src.exception import CustomException
 import pandas as pd
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
+from src.DMARTProject.loggers.logger import logger
+from src.exception import CustomException
 
-load_dotenv()###loading environment variables from .env file
-
+load_dotenv()  # load .env variables
 
 
 class DataIngestion:
@@ -19,14 +18,23 @@ class DataIngestion:
             self.db_driver = os.getenv("DB_DRIVER")
             self.table_name = os.getenv("TABLE_NAME")
 
+            # ✅ Validate env variables early
+            if not all([self.db_server, self.db_database, self.db_driver, self.table_name]):
+                raise ValueError(
+                    "One or more DB environment variables are missing. "
+                    "Check DB_SERVER, DB_DATABASE, DB_DRIVER, TABLE_NAME in .env"
+                )
+
             self.database_url = (
                 f"mssql+pyodbc://@{self.db_server}/{self.db_database}"
                 f"?driver={self.db_driver.replace(' ', '+')}"
                 f"&trusted_connection=yes"
             )
 
+            logger.info("Database connection string created successfully")
+
         except Exception as e:
-            logger.error("Error occurred while initializing DataIngestion class")
+            logger.exception("Error occurred while initializing DataIngestion class")
             raise CustomException(e, sys)
 
     def load_data(self) -> pd.DataFrame:
@@ -35,11 +43,10 @@ class DataIngestion:
             engine = create_engine(self.database_url)
             query = f"SELECT * FROM {self.table_name}"
             df = pd.read_sql(query, engine)
+
             logger.info("Data loaded successfully from MSSQL database")
             return df
 
         except Exception as e:
-            logger.error("Error occurred while loading data from MSSQL database")
+            logger.exception("Error occurred while loading data from MSSQL database")
             raise CustomException(e, sys)
-
-    
