@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# SQL Server Management Studio Solution File, Format Version 19.00
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "Project DMART", "Project DMART\Project DMART.ssmssqlproj", "{F5C215D9-5732-4D6D-A20B-12D2A2D6F08A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5C215D9-5732-4D6D-A20B-12D2A2D6F08A}.Default|Default.ActiveCfg = Default
+		{C8E53EDA-4303-42D6-AD2E-C79E0B005D11}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3050902B-C593-4AB7-8740-5D7BF2F7BA75}
+	EndGlobalSection
+EndGlobal
