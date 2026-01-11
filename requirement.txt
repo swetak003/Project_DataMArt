@@ -5,3 +5,5 @@ pyodbc
 python-dotenv
 scikit-learn
 logging
+seaborn
+matplotlib
