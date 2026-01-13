@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import pandas as pd
 
 class DataPersistence:
@@ -12,3 +12,6 @@ class DataPersistence:
         if_exists=mode,
         index=False
     )
+    def call_stored_procedure(self, sp_name: str):
+        with self.engine.begin() as conn:
+            conn.execute(text(f"EXEC {sp_name}"))

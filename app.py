@@ -62,6 +62,14 @@ if __name__ == "__main__":
         cleaned_df.to_csv(cleaned_path, index=False)
         logger.info(f"Cleaned data saved at {cleaned_path}")
 
+        
+        # 🔑 IMPORTANT: avoid PermissionError on Windows
+        if os.path.exists(cleaned_path):
+            os.remove(cleaned_path)
+
+        cleaned_df.to_csv(cleaned_path, index=False)
+        logger.info(f"Cleaned data saved at {cleaned_path}")
+
         # ===============================
         # STEP 6: WRITE TO SQL
         # ===============================
@@ -70,8 +78,11 @@ if __name__ == "__main__":
         
         logger.info("Cleaned data written to SQL table")
 
-        logger.info("DMART application finished successfully")
+        persistence.call_stored_procedure("sp_InsertSalesData")
+        logger.info("Stored procedure executed successfully")
 
+        logger.info("DMART application finished successfully")
+    
     except Exception as e:
         logger.exception("Application failed")
         raise CustomException(e, sys)
